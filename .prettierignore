@@ -1,0 +1,17 @@
+node_modules
+package-lock.json
+coverage
+**/out
+**/dist
+**/release
+.env*
+
+# Local agent context and planning
+AGENTS.md
+CLAUDE.md
+agents.md
+agent.md
+claude.md
+cloud.md
+docs/
+.planning/

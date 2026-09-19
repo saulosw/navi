@@ -1,0 +1,22 @@
+node_modules/
+.env
+.env.*
+!.env.example
+!.env.*.example
+coverage/
+**/out/
+**/dist/
+**/release/
+*.log
+.DS_Store
+.superpowers/
+
+# Local agent context and planning
+AGENTS.md
+CLAUDE.md
+agents.md
+agent.md
+claude.md
+cloud.md
+docs/
+.planning/

@@ -1,0 +1,18 @@
+.git
+**/node_modules
+**/.env
+**/.env.*
+**/out
+**/release
+coverage
+.superpowers
+
+# Local agent context and planning
+AGENTS.md
+CLAUDE.md
+agents.md
+agent.md
+claude.md
+cloud.md
+docs/
+.planning/
