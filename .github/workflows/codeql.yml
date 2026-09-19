@@ -1,0 +1,30 @@
+name: CodeQL
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Catches advisories published after a change was merged.
+    - cron: '0 6 * * 1'
+permissions:
+  contents: read
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: github/codeql-action/init@3ea06614dafe36dec890db3446326e0d40ce53d4 # v3.38.1
+        with:
+          languages: javascript-typescript
+          build-mode: none
+          queries: security-and-quality
+      - uses: github/codeql-action/analyze@3ea06614dafe36dec890db3446326e0d40ce53d4 # v3.38.1

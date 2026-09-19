@@ -1,0 +1,70 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: navi
+          POSTGRES_PASSWORD: ci_only_password
+          POSTGRES_DB: navi
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd 'pg_isready -U navi -d navi'
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://navi:ci_only_password@127.0.0.1:5432/navi
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            ~/.cache/electron
+            ~/AppData/Local/electron/Cache
+          key: electron-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: electron-${{ runner.os }}-
+      - run: npm ci
+      - run: npm run check
+      # Applied twice on purpose: the second run must be a no-op.
+      - run: npm run db:migrate
+      - run: npm run db:migrate
+      - run: npm run test:integration
+      - run: npm run build
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: coverage
+          path: coverage/lcov.info
+          retention-days: 7
+  api-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - run: docker build -f apps/api/Dockerfile -t navi-api:ci .
+  dependencies:
+    # Blocks pull requests that introduce a dependency with a known advisory.
+    # Needs a public repository or GitHub Advanced Security.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
