@@ -1,0 +1,23 @@
+appId: dev.navi.desktop
+productName: Navi
+executableName: navi
+directories:
+  output: release
+files:
+  - out/**/*
+  - package.json
+  - '!**/.env*'
+asar: true
+npmRebuild: false
+linux:
+  syncDesktopName: true
+  target:
+    - AppImage
+  category: Network
+win:
+  target:
+    - nsis
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+artifactName: '${productName}-${version}-${os}-${arch}.${ext}'
