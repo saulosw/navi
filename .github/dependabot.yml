@@ -24,6 +24,10 @@ updates:
       # step outright. Lift this once it declares support.
       - dependency-name: typescript
         update-types: [version-update:semver-major]
+      # @types/node majors track the Node release line, so anything above 24
+      # would describe APIs the 24 LTS runtime does not have.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
       # electron-vite 5 peers on vite ^5 || ^6 || ^7, so neither Vite 8 nor the
       # React plugin that requires it can be installed yet.
       - dependency-name: vite
