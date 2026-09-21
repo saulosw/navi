@@ -31,7 +31,8 @@
     "setup:env": "node scripts/setup-env.mjs",
     "test:integration": "node --env-file-if-exists=.env scripts/database-smoke.mjs",
     "postinstall": "node scripts/setup-electron.mjs",
-    "admin": "npm run admin -w @navi/api --"
+    "admin": "npm run admin -w @navi/api --",
+    "test:auth-integration": "node scripts/auth-integration.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

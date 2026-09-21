@@ -18,11 +18,17 @@ export default defineConfig({
         'apps/api/src/infrastructure/database/postgres-health-probe.ts',
         'apps/api/src/main/build-app.ts',
         'apps/desktop/src/renderer/components/**/*.tsx',
-        'apps/desktop/src/renderer/features/**/*.tsx',
+        'apps/desktop/src/renderer/features/**/*.{ts,tsx}',
+        'apps/desktop/src/main/auth/**/*.ts',
+        'apps/api/src/adapters/cli/**/*.ts',
+        'apps/api/src/infrastructure/security/crypto.ts',
+        'apps/api/src/infrastructure/database/accounts.ts',
+        'packages/contracts/src/validation.ts',
       ],
       // Interface-only modules erase to nothing at runtime, so they would report
       // 0% of 0 statements forever and only add noise to the table.
       exclude: [
+        '**/*.css.ts',
         'apps/api/src/application/ports/**',
         'apps/api/src/domain/users/{user,credentials}.ts',
       ],
