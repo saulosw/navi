@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node --env-file-if-exists=../../.env --watch src/main/server.ts",
     "start": "node --env-file-if-exists=../../.env src/main/server.ts",
-    "db:migrate": "node --env-file-if-exists=../../.env src/infrastructure/database/migrate.ts"
+    "db:migrate": "node --env-file-if-exists=../../.env src/infrastructure/database/migrate.ts",
+    "admin": "node --env-file-if-exists=../../.env src/main/admin.ts"
   },
   "dependencies": {
     "@fastify/helmet": "13.1.1",
