@@ -1,4 +1,9 @@
-import { app, BrowserWindow, session } from 'electron';
+import { pathToFileURL } from 'node:url';
+import { createSessionClient, validateEndpoint } from './auth/session-client';
+import type { SessionClient } from './auth/session-client';
+import { createTokenStore } from './auth/token-store';
+import { registerSessionIpc } from './auth/ipc';
+import { app, BrowserWindow, dialog, session, safeStorage, ipcMain } from 'electron';
 import { join } from 'node:path';
 
 const RENDERER_DEV_ORIGIN = 'http://127.0.0.1:5173';
@@ -28,7 +33,19 @@ function resolveRendererDevUrl(): string | undefined {
   return value;
 }
 
-function createWindow(devUrl: string | undefined): void {
+function rendererUrl(devUrl: string | undefined): string {
+  return devUrl ?? pathToFileURL(join(__dirname, '../renderer/index.html')).href;
+}
+
+function resolveEndpoint(): string {
+  return validateEndpoint(
+    process.env.NAVI_API_URL ??
+      String(import.meta.env.MAIN_VITE_API_URL ?? 'http://127.0.0.1:3001'),
+    app.isPackaged,
+  );
+}
+
+function createWindow(devUrl: string | undefined, client: SessionClient): void {
   const window = new BrowserWindow({
     width: 1120,
     height: 760,
@@ -46,6 +63,7 @@ function createWindow(devUrl: string | undefined): void {
       webSecurity: true,
     },
   });
+  registerSessionIpc(ipcMain, client, rendererUrl(devUrl), window.webContents.id);
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   window.webContents.on('will-navigate', (event) => event.preventDefault());
   window.webContents.on('will-attach-webview', (event) => event.preventDefault());
@@ -70,11 +88,32 @@ void app.whenReady().then(() => {
       }),
     );
   }
-  createWindow(devUrl);
+  let endpoint: string;
+  try {
+    endpoint = resolveEndpoint();
+  } catch {
+    dialog.showErrorBox(
+      'Navi cannot start',
+      'The configured API endpoint is not valid. Check NAVI_API_URL and start Navi again.',
+    );
+    app.quit();
+    return;
+  }
+
+  const store = createTokenStore(join(app.getPath('userData'), 'session.enc'), endpoint, {
+    available: async () =>
+      (await safeStorage.isAsyncEncryptionAvailable()) &&
+      !(process.platform === 'linux' && safeStorage.getSelectedStorageBackend() === 'basic_text'),
+    encrypt: (value) => safeStorage.encryptStringAsync(value),
+    decrypt: async (value) => (await safeStorage.decryptStringAsync(value)).result,
+  });
+  const client = createSessionClient(endpoint, store);
+  createWindow(devUrl, client);
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow(devUrl);
+    if (BrowserWindow.getAllWindows().length === 0) createWindow(devUrl, client);
   });
 });
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });

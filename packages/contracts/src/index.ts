@@ -27,4 +27,8 @@ export interface SessionView {
 
 export interface DesktopBridge {
   platform: 'linux' | 'darwin' | 'win32' | 'other';
+  login(input: LoginInput): Promise<Result<SessionView>>;
+  restoreSession(): Promise<Result<SessionView>>;
+  logout(): Promise<Result<{ warning?: string }>>;
+  listMembers(): Promise<Result<Member[]>>;
 }
