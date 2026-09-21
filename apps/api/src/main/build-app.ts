@@ -1,10 +1,12 @@
+import type { Auth } from '../application/auth.ts';
+import { registerAuthRoutes } from '../adapters/http/auth-routes.ts';
 import Fastify from 'fastify';
 import helmet from '@fastify/helmet';
 import type { HealthProbe } from '../application/ports/health-probe.ts';
 import { createReadinessCheck } from '../application/check-readiness.ts';
 import { registerHealthRoutes } from '../adapters/http/health-routes.ts';
 
-export function buildApp(probe: HealthProbe, logLevel?: string) {
+export function buildApp(probe: HealthProbe, logLevel?: string, auth?: Auth) {
   const app = Fastify({
     logger: logLevel
       ? {
@@ -17,5 +19,6 @@ export function buildApp(probe: HealthProbe, logLevel?: string) {
   });
   app.register(helmet);
   registerHealthRoutes(app, createReadinessCheck(probe));
+  if (auth) registerAuthRoutes(app, auth);
   return app;
 }
