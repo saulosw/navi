@@ -10,7 +10,7 @@
     "admin": "node --env-file-if-exists=../../.env src/main/admin.ts"
   },
   "dependencies": {
-    "@fastify/helmet": "13.1.1",
+    "@fastify/helmet": "13.2.0",
     "@navi/contracts": "0.1.0",
     "fastify": "5.12.5",
     "pg": "8.23.0",
